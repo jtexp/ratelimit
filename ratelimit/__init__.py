@@ -1,9 +1,10 @@
 from math import floor
 
+import datetime
 import time
 import sys
 
-def rate_limited(period = 1, every = 1.0):
+def rate_limited(period = 1000, every = 1000.0):
   '''
   Prevent a method from being called
   if it was previously called before
@@ -25,10 +26,10 @@ def rate_limited(period = 1, every = 1.0):
     last_called = [0.0]
 
     def wrapper(*args, **kargs):
-      elapsed = time.clock() - last_called[0]
+      elapsed = timestamp_millisec64() - last_called[0]
       left_to_wait = frequency - elapsed
       if left_to_wait > 0:
-        time.sleep(left_to_wait)
+        time.sleep(left_to_wait/1000)
       ret = func(*args, **kargs)
       last_called[0] = time.clock()
       return ret
@@ -46,6 +47,9 @@ def clamp(value):
   :return int: Clamped number of invocations.
   '''
   return max(1, min(sys.maxsize, floor(value)))
+
+def timestamp_millisec64():
+  return int((datetime.datetime.utcnow() - datetime.datetime(1970, 1, 1)).total_seconds() * 1000)
 
 __all__ = [
   'rate_limited'
